@@ -20,7 +20,17 @@ public class ClienteEntity {
 
     private LocalDateTime dataNascimento;
 
-    public Long getId() {
+    public ClienteEntity() {
+		super();
+	}
+
+	public ClienteEntity(long id, String nome, LocalDateTime dataNascimento) {
+		this.id = id;
+		this.nome = nome;
+		this.dataNascimento = dataNascimento;
+	}
+
+	public Long getId() {
         return id;
     }
 
