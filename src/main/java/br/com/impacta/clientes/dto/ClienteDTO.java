@@ -1,43 +1,58 @@
 package br.com.impacta.clientes.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import org.springframework.format.annotation.DateTimeFormat;
+import java.time.LocalDateTime;
 
-import java.time.LocalDate;
+import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 public class ClienteDTO {
 
-    @JsonProperty("id")
-    private Long id;
+	@JsonProperty("id")
+	private Long id;
+	@NotNull(message = "Campo nome é obrigatório")
+	@JsonProperty("nome")
+	private String nome;
 
-    @JsonProperty("nome")
-    private String nome;
+	@NotNull(message = "Campo data nascimento é obrigatório")
+	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+	@JsonSerialize(converter = LocalDateTimeToStringConverter.class)
+	@JsonDeserialize(converter = StringToLocalDatetimeConverter.class)
+	private LocalDateTime dataNascimento;
 
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    @JsonProperty("data_nascimento")
-    private LocalDate dataNascimento;
+	public ClienteDTO() {
+	}
 
-    public Long getId() {
-        return id;
-    }
+	public ClienteDTO(Long id, String nome, LocalDateTime dataNascimento) {
+		this.id = id;
+		this.nome = nome;
+		this.dataNascimento = dataNascimento;
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public String getNome() {
-        return nome;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
+	public String getNome() {
+		return nome;
+	}
 
-    public LocalDate getDataNascimento() {
-        return dataNascimento;
-    }
+	public void setNome(String nome) {
+		this.nome = nome;
+	}
 
-    public void setDataNascimento(LocalDate dataNascimento) {
-        this.dataNascimento = dataNascimento;
-    }
+	public LocalDateTime getDataNascimento() {
+		return dataNascimento;
+	}
+
+	public void setDataNascimento(LocalDateTime dataNascimento) {
+		this.dataNascimento = dataNascimento;
+	}
 }
