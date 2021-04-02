@@ -2,20 +2,25 @@ package br.com.impacta.clientes.dto;
 
 import java.time.LocalDateTime;
 
-import org.springframework.format.annotation.DateTimeFormat;
+import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 public class ClienteDTO {
 
 	@JsonProperty("id")
 	private Long id;
-
+	@NotNull(message = "Campo nome é obrigatório")
 	@JsonProperty("nome")
 	private String nome;
 
-	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-	@JsonProperty("data_nascimento")
+	@NotNull(message = "Campo data nascimento é obrigatório")
+	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+	@JsonSerialize(converter = LocalDateTimeToStringConverter.class)
+	@JsonDeserialize(converter = StringToLocalDatetimeConverter.class)
 	private LocalDateTime dataNascimento;
 
 	public ClienteDTO() {

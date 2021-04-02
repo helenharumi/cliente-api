@@ -22,11 +22,11 @@ public class ClienteService {
 		return toClienteDTO(clienteRepository.save(fromDTO(clienteDTO)));
 	}
 
-	private ClienteDTO toClienteDTO(ClienteEntity obj) {
+	public ClienteDTO toClienteDTO(ClienteEntity obj) {
 		return new ClienteDTO(obj.getId(), obj.getNome(), obj.getDataNascimento());
 	}
 
-	public ClienteDTO find(Long id) {
+	public ClienteDTO findById(Long id) {
 
 		Optional<ClienteEntity> obj = clienteRepository.findById(id);
 
@@ -42,21 +42,19 @@ public class ClienteService {
 		return clienteEntity;
 	}
 
-	public ClienteEntity update(ClienteEntity obj) {
-		obj.getId();
-
+	public ClienteDTO update(ClienteDTO obj) {
 		ClienteEntity newObj = clienteRepository.findById(obj.getId()).orElseGet(null);
 		updateData(newObj, obj);
-		return clienteRepository.save(newObj);
+		return toClienteDTO(clienteRepository.save(newObj));
 	}
 
-	private void updateData(ClienteEntity newObj, ClienteEntity obj) {
+	private void updateData(ClienteEntity newObj, ClienteDTO obj) {
 		newObj.setNome(obj.getNome());
 		newObj.setDataNascimento(obj.getDataNascimento());
 	}
 
-	public void delete(Long id) {
-		find(id);
+	public void deleteById(Long id) {
+		findById(id);
 		try {
 			clienteRepository.deleteById(id);
 		} catch (Exception e) {
