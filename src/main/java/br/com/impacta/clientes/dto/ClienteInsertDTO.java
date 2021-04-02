@@ -9,10 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-public class ClienteDTO {
-
-	@JsonProperty("id")
-	private Long id;
+public class ClienteInsertDTO {
 	
 	@NotNull(message = "Campo nome é obrigatório")
 	@JsonProperty("nome")
@@ -24,21 +21,12 @@ public class ClienteDTO {
 	@JsonDeserialize(converter = StringToLocalDatetimeConverter.class)
 	private LocalDateTime dataNascimento;
 
-	public ClienteDTO() {
+	public ClienteInsertDTO() {
 	}
 
-	public ClienteDTO(Long id, String nome, LocalDateTime dataNascimento) {
-		this.id = id;
+	public ClienteInsertDTO(String nome, LocalDateTime dataNascimento) {
 		this.nome = nome;
 		this.dataNascimento = dataNascimento;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public String getNome() {

@@ -43,14 +43,14 @@ public class ClienteServiceTest {
 
 	@Test
 	public void post_saveCustomerAndReturnTheResource201() throws Exception {
-		ClienteEntity dados = new ClienteEntity();
-		dados.setId(1l);
-		dados.setNome("Renan");
-		dados.setDataNascimento(LocalDateTime.of(1992, 07, 20, 23, 59));
+		ClienteEntity cliente = new ClienteEntity();
+		cliente.setId(1l);
+		cliente.setNome("Renan");
+		cliente.setDataNascimento(LocalDateTime.of(1992, 07, 20, 23, 59));
 
-		ClienteDTO dto = new ClienteDTO(dados.getId(), dados.getNome(), dados.getDataNascimento());
+		ClienteDTO dto = new ClienteDTO(cliente.getId(), cliente.getNome(), cliente.getDataNascimento());
 
-		when(service.incluir(Mockito.any(ClienteDTO.class))).thenReturn(dto);
+		when(service.save(Mockito.any(ClienteEntity.class))).thenReturn(cliente);
 
 		mockMvc.perform(post("/cliente").contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(dto))).andExpect(status().isCreated());
@@ -58,20 +58,22 @@ public class ClienteServiceTest {
 
 	@Test
 	public void put_updatesAndReturnsUpdatedObjWith204() throws Exception {
-		ClienteDTO cliente = new ClienteDTO(1l, "Maria", LocalDateTime.now());
+		ClienteEntity cliente = new ClienteEntity(1l, "Maria", LocalDateTime.now());
+		ClienteDTO dto = new ClienteDTO(cliente.getId(), cliente.getNome(), cliente.getDataNascimento());
 
 		when(service.update(cliente)).thenReturn(cliente);
 
 		mockMvc.perform(put("/cliente/1", cliente).contentType(MediaType.APPLICATION_JSON_VALUE)
 				.accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8")
-				.content(objectMapper.writeValueAsBytes(cliente))).andExpect(status().is2xxSuccessful());
+				.content(objectMapper.writeValueAsBytes(dto))).andExpect(status().is2xxSuccessful());
 	}
 
 	@Test
 	public void post_submitsInvalidCustomer_WithEmptyMake_Returns400() throws Exception {
+		ClienteEntity cliente = new ClienteEntity();
 		ClienteDTO dto = new ClienteDTO();
 
-		when(service.incluir(Mockito.any(ClienteDTO.class))).thenReturn(dto);
+		when(service.save(Mockito.any(ClienteEntity.class))).thenReturn(cliente);
 
 		mockMvc.perform(
 				post("/cliente/").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(dto)))
