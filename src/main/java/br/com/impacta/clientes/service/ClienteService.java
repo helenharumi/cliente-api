@@ -17,7 +17,7 @@ public class ClienteService {
 	@Autowired
 	private ClienteRepository clienteRepository;
 
-	public ClienteDTO incluir(ClienteDTO clienteDTO) {
+	public ClienteDTO save(ClienteDTO clienteDTO) {
 
 		return toClienteDTO(clienteRepository.save(fromDTO(clienteDTO)));
 	}

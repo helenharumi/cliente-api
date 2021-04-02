@@ -39,12 +39,12 @@ public class ClienteController {
 			@ApiResponse(code = 403, message = "You do not have permission to access this resource"),
 			@ApiResponse(code = 500, message = "an exception was thrown"), })
 	@PostMapping
-	public ResponseEntity<ClienteDTO> incluir(@Valid @RequestBody ClienteDTO clienteDTO) {
+	public ResponseEntity<ClienteDTO> save(@Valid @RequestBody ClienteDTO clienteDTO) {
 		
 		if (clienteDTO.getDataNascimento() == null || clienteDTO.getNome() == null  || clienteDTO.getNome().isEmpty())
 			return ResponseEntity.badRequest().build();
 		
-		ClienteDTO obj = service.incluir(clienteDTO);
+		ClienteDTO obj = service.save(clienteDTO);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(obj.getId()).toUri();
 		return ResponseEntity.created(uri).build();
 	}

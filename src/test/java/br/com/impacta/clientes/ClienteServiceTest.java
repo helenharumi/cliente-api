@@ -50,7 +50,7 @@ public class ClienteServiceTest {
 
 		ClienteDTO dto = new ClienteDTO(dados.getId(), dados.getNome(), dados.getDataNascimento());
 
-		when(service.incluir(Mockito.any(ClienteDTO.class))).thenReturn(dto);
+		when(service.save(Mockito.any(ClienteDTO.class))).thenReturn(dto);
 
 		mockMvc.perform(post("/cliente").contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(dto))).andExpect(status().isCreated());
@@ -71,7 +71,7 @@ public class ClienteServiceTest {
 	public void post_submitsInvalidCustomer_WithEmptyMake_Returns400() throws Exception {
 		ClienteDTO dto = new ClienteDTO();
 
-		when(service.incluir(Mockito.any(ClienteDTO.class))).thenReturn(dto);
+		when(service.save(Mockito.any(ClienteDTO.class))).thenReturn(dto);
 
 		mockMvc.perform(
 				post("/cliente/").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(dto)))
