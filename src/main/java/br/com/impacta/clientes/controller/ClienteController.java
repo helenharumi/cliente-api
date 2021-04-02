@@ -46,9 +46,9 @@ public class ClienteController {
 			@ApiResponse(code = 403, message = "You do not have permission to access this resource"),
 			@ApiResponse(code = 500, message = "an exception was thrown"), })
 	@PostMapping
-	public ResponseEntity<ClienteDTO> incluir(@RequestBody ClienteInsertDTO clienteDTO) {
-
-		if (clienteDTO.getDataNascimento() == null || clienteDTO.getNome() == null || clienteDTO.getNome().isEmpty())
+	public ResponseEntity<ClienteDTO> save(@Valid @RequestBody ClienteInsertDTO clienteDTO) {
+		
+		if (clienteDTO.getDataNascimento() == null || clienteDTO.getNome() == null  || clienteDTO.getNome().isEmpty())
 			return ResponseEntity.badRequest().build();
 
 		ClienteEntity obj = service.save(fromDTO(clienteDTO));
@@ -139,14 +139,7 @@ public class ClienteController {
 	}
 
 	public ClienteEntity fromDTO(ClienteInsertDTO objDto) {
-		ClienteEntity map = modelMapper.map(objDto, ClienteEntity.class);
-//		
-//		
-//		
-//		ClienteEntity clienteEntity = new ClienteEntity();
-//		clienteEntity.setNome(objDto.getNome());
-//		clienteEntity.setDataNascimento(objDto.getDataNascimento());
-		return map;
+		return modelMapper.map(objDto, ClienteEntity.class);
 	}
 	
 	
