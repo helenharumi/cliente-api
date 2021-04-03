@@ -3,11 +3,11 @@ package br.com.impacta.clientes.service;
 import java.util.List;
 import java.util.Optional;
 
-import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.impacta.clientes.entity.ClienteEntity;
+import br.com.impacta.clientes.exceptions.ObjectNotFoundException;
 import br.com.impacta.clientes.repository.ClienteRepository;
 
 @Service
@@ -27,7 +27,8 @@ public class ClienteService {
 	}
 
 	public ClienteEntity update(ClienteEntity obj) {
-		ClienteEntity newObj = repository.findById(obj.getId()).orElseGet(null);
+		ClienteEntity newObj = repository.findById(obj.getId()).orElseThrow(() -> new ObjectNotFoundException(
+				"object not found! Id: " + obj.getId() + ", Type: " + ClienteEntity.class.getName(), null));
 		updateData(newObj, obj);
 		return repository.save(newObj);
 	}
