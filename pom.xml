@@ -10,10 +10,10 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>br.com.impacta</groupId>
-	<artifactId>clientes</artifactId>
+	<artifactId>customers</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>clientes</name>
-	<description>API de cadastro de clientes</description>
+	<name>customers</name>
+	<description>Customer registration API</description>
 	<properties>
 		<java.version>11</java.version>
 	</properties>

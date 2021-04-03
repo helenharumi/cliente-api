@@ -1,4 +1,4 @@
-package br.com.impacta.clientes.dto;
+package br.com.impacta.customers.dto;
 
 import java.time.LocalDateTime;
 
@@ -11,41 +11,49 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-public class ClienteInsertDTO {
+import br.com.impacta.customers.util.LocalDateTimeToStringConverter;
+import br.com.impacta.customers.util.StringToLocalDatetimeConverter;
 
-	@JsonProperty("nome")
+public class CustomersDTO {
+
+	@JsonProperty("id")
+	private Long id;
+
+	@JsonProperty("name")
 	@NotNull(message = "Name cannot be null")
 	@NotBlank(message = "Name cannot be empty")
 	@Size(min = 1, max = 200, message = "The name must be between 1 and 200 characters")
-	private String nome;
+	private String name;
 
 	@NotNull(message = "Birth date is mandatory")
 	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
 	@JsonSerialize(converter = LocalDateTimeToStringConverter.class)
 	@JsonDeserialize(converter = StringToLocalDatetimeConverter.class)
-	private LocalDateTime dataNascimento;
+	private LocalDateTime birthDate;
 
-	public ClienteInsertDTO() {
+	public CustomersDTO() {
 	}
 
-	public ClienteInsertDTO(String nome, LocalDateTime dataNascimento) {
-		this.nome = nome;
-		this.dataNascimento = dataNascimento;
+	public CustomersDTO(Long id , String name, LocalDateTime birthDate) {
+		this.id = id;
+		this.name = name;
+		this.birthDate = birthDate;
 	}
 
-	public String getNome() {
-		return nome;
+	public String getName() {
+		return name;
 	}
 
-	public void setNome(String nome) {
-		this.nome = nome;
+	public void setName(String name) {
+		this.name = name;
 	}
 
-	public LocalDateTime getDataNascimento() {
-		return dataNascimento;
+	public LocalDateTime getBirthDate() {
+		return birthDate;
 	}
 
-	public void setDataNascimento(LocalDateTime dataNascimento) {
-		this.dataNascimento = dataNascimento;
+	public void setBirthDate(LocalDateTime birthDate) {
+		this.birthDate = birthDate;
 	}
+
 }

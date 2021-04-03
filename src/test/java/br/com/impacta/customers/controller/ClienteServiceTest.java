@@ -1,4 +1,4 @@
-package br.com.impacta.clientes.controller;
+package br.com.impacta.customers.controller;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -22,9 +22,9 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import br.com.impacta.clientes.dto.ClienteDTO;
-import br.com.impacta.clientes.entity.ClienteEntity;
-import br.com.impacta.clientes.service.ClienteService;
+import br.com.impacta.customers.dto.CustomersDTO;
+import br.com.impacta.customers.entity.CustomersEntity;
+import br.com.impacta.customers.service.CustomersService;
 
 @SpringBootTest(properties = { "spring.jpa.hibernate.ddl-auto=create-drop", "spring.liquibase.enabled=false",
 		"spring.flyway.enabled=false" })
@@ -38,22 +38,22 @@ public class ClienteServiceTest {
 	private ObjectMapper objectMapper;
 
 	@MockBean
-	ClienteService service;
+	CustomersService service;
 	
 	
 	@Test
 	public void post_saveCustomerAndReturnTheResource201() throws Exception {
 		
-		ClienteEntity cliente = new ClienteEntity();
+		CustomersEntity cliente = new CustomersEntity();
 		cliente.setId(1l);
-		cliente.setNome("Renan");
-		cliente.setDataNascimento(LocalDateTime.of(1992, 07, 20, 23, 59));
+		cliente.setName("Renan");
+		cliente.setBirthDate(LocalDateTime.of(1992, 07, 20, 23, 59));
 
-		ClienteDTO dto = new ClienteDTO(cliente.getId(), cliente.getNome(), cliente.getDataNascimento());
+		CustomersDTO dto = new CustomersDTO(cliente.getId(), cliente.getName(), cliente.getBirthDate());
 
-		when(service.save(Mockito.any(ClienteEntity.class))).thenReturn(cliente);
+		when(service.save(Mockito.any(CustomersEntity.class))).thenReturn(cliente);
 
-		mockMvc.perform(post("/v1/cliente")
+		mockMvc.perform(post("/v1/customers")
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(dto)))
@@ -62,12 +62,12 @@ public class ClienteServiceTest {
 
 	@Test
 	public void put_updatesAndReturnsUpdatedObjWith204() throws Exception {
-		ClienteEntity cliente = new ClienteEntity(1l, "Maria", LocalDateTime.now());
-		ClienteDTO dto = new ClienteDTO(cliente.getId(), cliente.getNome(), cliente.getDataNascimento());
+		CustomersEntity cliente = new CustomersEntity(1l, "Maria", LocalDateTime.now());
+		CustomersDTO dto = new CustomersDTO(cliente.getId(), cliente.getName(), cliente.getBirthDate());
 
 		when(service.update(cliente)).thenReturn(cliente);
 
-		mockMvc.perform(put("/v1/cliente/1", cliente)
+		mockMvc.perform(put("/v1/customers/1", cliente)
 				.contentType(MediaType.APPLICATION_JSON_VALUE)
 				.accept(MediaType.APPLICATION_JSON)
 				.characterEncoding("UTF-8")
@@ -77,12 +77,12 @@ public class ClienteServiceTest {
 
 	@Test
 	public void post_submitsInvalidCustomer_WithEmptyMake_Returns400() throws Exception {
-		ClienteEntity cliente = new ClienteEntity();
-		ClienteDTO dto = new ClienteDTO();
+		CustomersEntity cliente = new CustomersEntity();
+		CustomersDTO dto = new CustomersDTO();
 
-		when(service.save(Mockito.any(ClienteEntity.class))).thenReturn(cliente);
+		when(service.save(Mockito.any(CustomersEntity.class))).thenReturn(cliente);
 
-		mockMvc.perform(post("/v1/cliente/")
+		mockMvc.perform(post("/v1/customers/")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(dto)))
 				.andExpect(status().isBadRequest());
@@ -91,14 +91,14 @@ public class ClienteServiceTest {
 	@Test
 	public void get_allCustomers_returnsOkWithListOfCustomers() throws Exception {
 
-		ClienteEntity c1 = new ClienteEntity();
-		ClienteEntity c2 = new ClienteEntity();
+		CustomersEntity c1 = new CustomersEntity();
+		CustomersEntity c2 = new CustomersEntity();
 
-		List<ClienteEntity> list = List.of(c1, c2);
+		List<CustomersEntity> list = List.of(c1, c2);
 
 		Mockito.when(service.findAll()).thenReturn(list);
 
-		mockMvc.perform(get("/v1/cliente/list")
+		mockMvc.perform(get("/v1/customers/list")
 				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
@@ -106,7 +106,7 @@ public class ClienteServiceTest {
 	@Test
 	public void deleteCustomer() throws Exception {
 		Long idCliente = 100l;
-		ResultActions result = mockMvc.perform(delete("/v1/cliente/{id}", idCliente)
+		ResultActions result = mockMvc.perform(delete("/v1/customers/{id}", idCliente)
 				.accept(MediaType.APPLICATION_JSON));
 		
 		result.andExpect(status().isNoContent());

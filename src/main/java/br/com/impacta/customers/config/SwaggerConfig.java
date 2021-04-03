@@ -1,4 +1,4 @@
-package br.com.impacta.clientes.config;
+package br.com.impacta.customers.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +18,7 @@ public class SwaggerConfig extends WebMvcConfigurationSupport {
     public Docket greetingApi() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("br.com.impacta.clientes"))
+                .apis(RequestHandlerSelectors.basePackage("br.com.impacta.customers"))
                 .build()
                 .apiInfo(metaData());
 
@@ -26,8 +26,8 @@ public class SwaggerConfig extends WebMvcConfigurationSupport {
 
     private ApiInfo metaData() {
         return new ApiInfoBuilder()
-                .title("Projeto api - cadastro de clientes")
-                .description("\"Projeto api - cadastro de clientes\"")
+                .title("Api project - customer registration")
+                .description("\"Api project - customer registration\"")
                 .version("1.0.0")
                 .license("Apache License Version 2.0")
                 .licenseUrl("https://www.apache.org/licenses/LICENSE-2.0\"")

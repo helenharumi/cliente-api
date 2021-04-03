@@ -1,4 +1,4 @@
-package br.com.impacta.clientes.dto;
+package br.com.impacta.customers.util;
 
 import java.time.LocalDateTime;
 
