@@ -4,8 +4,9 @@ import java.net.URI;
 import java.util.List;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
-import org.hibernate.ObjectNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,21 +37,18 @@ public class ClienteController {
 
 	@Autowired
 	private ClienteService service;
-	
+
 	@Autowired
-    private ModelMapper modelMapper;
+	private ModelMapper modelMapper;
 
 	@ApiOperation(value = "Insert a new object into the database")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Success"),
 			@ApiResponse(code = 401, message = "You do not have permission to access this resource ((Unauthorized))"),
+			@ApiResponse(code = 400, message = "the server cannot or will not process the request due to something that was perceived as a client error"),
 			@ApiResponse(code = 403, message = "You do not have permission to access this resource"),
 			@ApiResponse(code = 500, message = "an exception was thrown"), })
 	@PostMapping
 	public ResponseEntity<ClienteDTO> save(@Valid @RequestBody ClienteInsertDTO clienteDTO) {
-		
-		if (clienteDTO.getDataNascimento() == null || clienteDTO.getNome() == null  || clienteDTO.getNome().isEmpty())
-			return ResponseEntity.badRequest().build();
-
 		ClienteEntity obj = service.save(fromDTO(clienteDTO));
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(obj.getId()).toUri();
 		return ResponseEntity.created(uri).build();
@@ -59,55 +57,51 @@ public class ClienteController {
 	@ApiOperation(value = "Return an object")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Success"),
 			@ApiResponse(code = 401, message = "You do not have permission to access this resource ((Unauthorized))"),
+			@ApiResponse(code = 400, message = "the server cannot or will not process the request due to something that was perceived as a client error"),
 			@ApiResponse(code = 403, message = "You do not have permission to access this resource"),
 			@ApiResponse(code = 404, message = "You do not have permission to access this resource"),
 			@ApiResponse(code = 500, message = "an exception was thrown"), })
 	@GetMapping(value = "/{id}")
-	public ResponseEntity<ClienteDTO> find(@PathVariable Long id) {
+	public ResponseEntity<ClienteDTO> find(@PathVariable @Size(min = 1)  Long id) {
 		ClienteEntity obj = null;
-		try {
-			obj = service.findById(id);
-			return ResponseEntity.ok().body(toClienteDTO(obj));
-		} catch (ObjectNotFoundException e) {
-			return ResponseEntity.notFound().build();
-		}
-
+		obj = service.findById(id);
+		return ResponseEntity.ok().body(toClienteDTO(obj));
 	}
 
 	@ApiOperation(value = "Return an object")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Success"),
 			@ApiResponse(code = 401, message = "You do not have permission to access this resource ((Unauthorized))"),
+			@ApiResponse(code = 400, message = "the server cannot or will not process the request due to something that was perceived as a client error"),
 			@ApiResponse(code = 403, message = "You do not have permission to access this resource"),
-			@ApiResponse(code = 500, message = "an exception was thrown"), })
+			@ApiResponse(code = 500, message = "an exception was thrown") })
 	@GetMapping(value = "/findByName/{nome}")
-	public ResponseEntity<ClienteDTO> findByNome(@PathVariable String nome) {
+	public ResponseEntity<ClienteDTO> findByNome(@PathVariable @NotBlank String nome) {
 
 		ClienteEntity obj;
-		try {
-			obj = service.findByNome(nome);
-			return ResponseEntity.ok().body(toClienteDTO(obj));
-		} catch (ObjectNotFoundException e) {
-			return ResponseEntity.notFound().build();
-		}
+		obj = service.findByNome(nome);
+		return ResponseEntity.ok().body(toClienteDTO(obj));
 	}
 
 	@ApiOperation(value = "Returns all objects")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Success"),
 			@ApiResponse(code = 401, message = "You do not have permission to access this resource ((Unauthorized))"),
+			@ApiResponse(code = 400, message = "the server cannot or will not process the request due to something that was perceived as a client error"),
 			@ApiResponse(code = 403, message = "You do not have permission to access this resource"),
-			@ApiResponse(code = 500, message = "an exception was thrown"), })
+			@ApiResponse(code = 500, message = "an exception was thrown") })
 	@GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<ClienteDTO>> findAll() {
 
 		List<ClienteEntity> list = service.findAll();
-		List<ClienteDTO> listDto = modelMapper.map(list, new TypeToken<List<ClienteDTO>>() {}.getType());
-		
+		List<ClienteDTO> listDto = modelMapper.map(list, new TypeToken<List<ClienteDTO>>() {
+		}.getType());
+
 		return ResponseEntity.ok().body(listDto);
 	}
 
 	@ApiOperation(value = "Update an object")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Success"),
 			@ApiResponse(code = 401, message = "You do not have permission to access this resource ((Unauthorized))"),
+			@ApiResponse(code = 400, message = "the server cannot or will not process the request due to something that was perceived as a client error"),
 			@ApiResponse(code = 403, message = "You do not have permission to access this resource"),
 			@ApiResponse(code = 404, message = "This resource not found "),
 			@ApiResponse(code = 500, message = "an exception was thrown"), })
@@ -126,25 +120,20 @@ public class ClienteController {
 			@ApiResponse(code = 500, message = "an exception was thrown"), })
 	@DeleteMapping(value = "/{id}")
 	public ResponseEntity<Void> delete(@PathVariable Long id) {
-		try {
 			service.deleteById(id);
 			return ResponseEntity.noContent().build();
-		} catch (ObjectNotFoundException e) {
-			return ResponseEntity.notFound().build();
-		}
 	}
 
 	public ClienteDTO toClienteDTO(ClienteEntity obj) {
-		return new ClienteDTO(obj.getId(), obj.getNome(), obj.getDataNascimento());
+		return modelMapper.map(obj, ClienteDTO.class);
 	}
 
 	public ClienteEntity fromDTO(ClienteInsertDTO objDto) {
 		return modelMapper.map(objDto, ClienteEntity.class);
 	}
-	
-	
+
 	@Bean
 	public ModelMapper modelMapper() {
-	    return new ModelMapper();
+		return new ModelMapper();
 	}
 }
