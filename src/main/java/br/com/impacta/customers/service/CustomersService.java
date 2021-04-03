@@ -51,15 +51,16 @@ public class CustomersService {
 		return repository.findAll();
 	}
 
-	public CustomersEntity findByName(String name) {
+	public List<CustomersEntity> findByName(String name) {
 
 		if (name == null || name.isEmpty())
 			throw new IllegalArgumentException("filter cannot be empty");
 
-		Optional<CustomersEntity> obj = repository.findByName(name);
-
-		return obj.orElseThrow(() -> new ObjectNotFoundException(
-				"object not found! Name: " + name + ", Type: " + CustomersEntity.class.getName(), null));
+		List<CustomersEntity> obj = repository.findByNameIgnoreCase(name);
+		
+		if (obj == null || obj.isEmpty())
+			throw new ObjectNotFoundException("object not found by name"); 
+		return obj;
 	}
 
 }

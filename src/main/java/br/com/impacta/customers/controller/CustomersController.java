@@ -74,12 +74,15 @@ public class CustomersController {
 			@ApiResponse(code = 400, message = "the server cannot or will not process the request due to something that was perceived as a client error"),
 			@ApiResponse(code = 403, message = "You do not have permission to access this resource"),
 			@ApiResponse(code = 500, message = "an exception was thrown") })
-	@GetMapping(value = "/findByName/{nome}")
-	public ResponseEntity<CustomersDTO> findByNome(@PathVariable @NotBlank String name) {
+	@GetMapping(value = "/findByName/{name}")
+	public ResponseEntity<List<CustomersDTO>> findByNome(@PathVariable @NotBlank String name) {
 
-		CustomersEntity obj;
-		obj = service.findByName(name);
-		return ResponseEntity.ok().body(convertToCustomersDTO(obj));
+		List<CustomersEntity> obj = service.findByName(name);
+		
+		List<CustomersDTO> listDto = modelMapper.map(obj, new TypeToken<List<CustomersDTO>>() {
+		}.getType());
+		
+		return ResponseEntity.ok().body(listDto);
 	}
 
 	@ApiOperation(value = "Returns all objects")

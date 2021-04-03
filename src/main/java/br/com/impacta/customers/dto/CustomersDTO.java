@@ -35,7 +35,7 @@ public class CustomersDTO {
 	}
 
 	public CustomersDTO(Long id , String name, LocalDateTime birthDate) {
-		this.id = id;
+		this.setId(id);
 		this.name = name;
 		this.birthDate = birthDate;
 	}
@@ -54,6 +54,14 @@ public class CustomersDTO {
 
 	public void setBirthDate(LocalDateTime birthDate) {
 		this.birthDate = birthDate;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 }
