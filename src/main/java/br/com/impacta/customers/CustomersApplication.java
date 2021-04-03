@@ -1,13 +1,13 @@
-package br.com.impacta.clientes;
+package br.com.impacta.customers;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ClientesApplication {
+public class CustomersApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(ClientesApplication.class, args);
+        SpringApplication.run(CustomersApplication.class, args);
     }
 
 }

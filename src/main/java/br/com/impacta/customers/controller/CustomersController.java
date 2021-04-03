@@ -1,4 +1,4 @@
-package br.com.impacta.clientes.controller;
+package br.com.impacta.customers.controller;
 
 import java.net.URI;
 import java.util.List;
@@ -23,20 +23,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import br.com.impacta.clientes.dto.ClienteDTO;
-import br.com.impacta.clientes.dto.ClienteInsertDTO;
-import br.com.impacta.clientes.entity.ClienteEntity;
-import br.com.impacta.clientes.service.ClienteService;
+import br.com.impacta.customers.dto.CustomersDTO;
+import br.com.impacta.customers.dto.CustomersInsertDTO;
+import br.com.impacta.customers.entity.CustomersEntity;
+import br.com.impacta.customers.service.CustomersService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 @RestController
-@RequestMapping(value = "/v1/cliente")
-public class ClienteController {
+@RequestMapping(value = "/v1/customers")
+public class CustomersController {
 
 	@Autowired
-	private ClienteService service;
+	private CustomersService service;
 
 	@Autowired
 	private ModelMapper modelMapper;
@@ -48,8 +48,8 @@ public class ClienteController {
 			@ApiResponse(code = 403, message = "You do not have permission to access this resource"),
 			@ApiResponse(code = 500, message = "an exception was thrown"), })
 	@PostMapping
-	public ResponseEntity<ClienteDTO> save(@Valid @RequestBody ClienteInsertDTO clienteDTO) {
-		ClienteEntity obj = service.save(fromDTO(clienteDTO));
+	public ResponseEntity<CustomersDTO> save(@Valid @RequestBody CustomersInsertDTO customersDTO) {
+		CustomersEntity obj = service.save(convertFromCustomersDTOtoCustomersDTO(customersDTO));
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(obj.getId()).toUri();
 		return ResponseEntity.created(uri).build();
 	}
@@ -62,10 +62,10 @@ public class ClienteController {
 			@ApiResponse(code = 404, message = "You do not have permission to access this resource"),
 			@ApiResponse(code = 500, message = "an exception was thrown"), })
 	@GetMapping(value = "/{id}")
-	public ResponseEntity<ClienteDTO> find(@PathVariable @Size(min = 1)  Long id) {
-		ClienteEntity obj = null;
+	public ResponseEntity<CustomersDTO> find(@PathVariable @Size(min = 1)  Long id) {
+		CustomersEntity obj = null;
 		obj = service.findById(id);
-		return ResponseEntity.ok().body(toClienteDTO(obj));
+		return ResponseEntity.ok().body(convertToCustomersDTO(obj));
 	}
 
 	@ApiOperation(value = "Return an object")
@@ -74,12 +74,15 @@ public class ClienteController {
 			@ApiResponse(code = 400, message = "the server cannot or will not process the request due to something that was perceived as a client error"),
 			@ApiResponse(code = 403, message = "You do not have permission to access this resource"),
 			@ApiResponse(code = 500, message = "an exception was thrown") })
-	@GetMapping(value = "/findByName/{nome}")
-	public ResponseEntity<ClienteDTO> findByNome(@PathVariable @NotBlank String nome) {
+	@GetMapping(value = "/findByName/{name}")
+	public ResponseEntity<List<CustomersDTO>> findByNome(@PathVariable @NotBlank String name) {
 
-		ClienteEntity obj;
-		obj = service.findByNome(nome);
-		return ResponseEntity.ok().body(toClienteDTO(obj));
+		List<CustomersEntity> obj = service.findByName(name);
+		
+		List<CustomersDTO> listDto = modelMapper.map(obj, new TypeToken<List<CustomersDTO>>() {
+		}.getType());
+		
+		return ResponseEntity.ok().body(listDto);
 	}
 
 	@ApiOperation(value = "Returns all objects")
@@ -89,10 +92,10 @@ public class ClienteController {
 			@ApiResponse(code = 403, message = "You do not have permission to access this resource"),
 			@ApiResponse(code = 500, message = "an exception was thrown") })
 	@GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<List<ClienteDTO>> findAll() {
+	public ResponseEntity<List<CustomersDTO>> findAll() {
 
-		List<ClienteEntity> list = service.findAll();
-		List<ClienteDTO> listDto = modelMapper.map(list, new TypeToken<List<ClienteDTO>>() {
+		List<CustomersEntity> list = service.findAll();
+		List<CustomersDTO> listDto = modelMapper.map(list, new TypeToken<List<CustomersDTO>>() {
 		}.getType());
 
 		return ResponseEntity.ok().body(listDto);
@@ -106,11 +109,11 @@ public class ClienteController {
 			@ApiResponse(code = 404, message = "This resource not found "),
 			@ApiResponse(code = 500, message = "an exception was thrown"), })
 	@PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<ClienteDTO> update(@Valid @RequestBody ClienteInsertDTO objDto, @PathVariable Long id) {
-		ClienteEntity obj = fromDTO(objDto);
+	public ResponseEntity<CustomersDTO> update(@Valid @RequestBody CustomersInsertDTO objDto, @PathVariable Long id) {
+		CustomersEntity obj = convertFromCustomersDTOtoCustomersDTO(objDto);
 		obj.setId(id);
-		ClienteEntity body = service.update(obj);
-		return ResponseEntity.ok(toClienteDTO(body));
+		CustomersEntity body = service.update(obj);
+		return ResponseEntity.ok(convertToCustomersDTO(body));
 	}
 
 	@ApiOperation(value = "Delete an object")
@@ -124,12 +127,12 @@ public class ClienteController {
 			return ResponseEntity.noContent().build();
 	}
 
-	public ClienteDTO toClienteDTO(ClienteEntity obj) {
-		return modelMapper.map(obj, ClienteDTO.class);
+	public CustomersDTO convertToCustomersDTO(CustomersEntity obj) {
+		return modelMapper.map(obj, CustomersDTO.class);
 	}
 
-	public ClienteEntity fromDTO(ClienteInsertDTO objDto) {
-		return modelMapper.map(objDto, ClienteEntity.class);
+	public CustomersEntity convertFromCustomersDTOtoCustomersDTO(CustomersInsertDTO objDto) {
+		return modelMapper.map(objDto, CustomersEntity.class);
 	}
 
 	@Bean

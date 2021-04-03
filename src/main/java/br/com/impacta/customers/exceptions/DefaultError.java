@@ -1,4 +1,4 @@
-package br.com.impacta.clientes.exceptions;
+package br.com.impacta.customers.exceptions;
 
 import java.io.Serializable;
 
