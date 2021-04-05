@@ -3,8 +3,7 @@
 Disciplina: APi Gateway & Integration
 
 ### Execução do Projeto
-Ative o modo dev, para inicializar a aplicação com um banco de dados H2.
-'mvn spring-boot:run -Dspring-boot.run.profiles=dev'
+Ative o modo dev `mvn spring-boot:run -Dspring-boot.run.profiles=dev`, para inicializar a aplicação com um banco de dados H2.
 
 Acesse a URL: http://localhost:8080/h2
 
@@ -17,6 +16,6 @@ Ao logar certifique-se que a tabela foi criada de forma automática.
 
 ### Para acesso a documentação acesse a URL: 
 
-'http://localhost:8080/swagger-ui.html'
+http://localhost:8080/swagger-ui.html
 
 ![image](https://user-images.githubusercontent.com/38084253/113488150-9fad4180-9492-11eb-91f4-68991201eccc.png)
