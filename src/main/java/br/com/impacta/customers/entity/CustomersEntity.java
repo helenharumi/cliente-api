@@ -90,7 +90,4 @@ public class CustomersEntity {
 			return false;
 		return true;
 	}
-
-	
-    
 }
