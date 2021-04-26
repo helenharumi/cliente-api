@@ -65,7 +65,7 @@ public class CustomersControllerTest {
 
 	@Test
 	public void get_findCustomerByIdSucess() throws Exception {
-		Long idCliente = 100l;
+		Long idCliente = 100L;
 
 		Optional<CustomersEntity> cust = Optional.ofNullable(mockCustomersEntity());
 
@@ -79,7 +79,7 @@ public class CustomersControllerTest {
 	
 	@Test
 	public void get_findCustomerByIdNotFound() throws Exception {
-		Long idCliente = 100l;
+		Long idCliente = 100L;
 
 		mockMvc.perform(get("/v1/customers/{id}", idCliente)
 				.contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -91,7 +91,7 @@ public class CustomersControllerTest {
 	public void get_findCustomerByNameSucess() throws Exception {
 		String nameCli = "Maria";
 		List<CustomersEntity> listCustomer = new ArrayList<>();
-		CustomersEntity client = new CustomersEntity(1l, "Maria", LocalDateTime.now());
+		CustomersEntity client = new CustomersEntity(1L, "Maria", LocalDateTime.now());
 		listCustomer.add(client);
 
 		when(repository.findByNameIgnoreCase(Mockito.anyString())).thenReturn(listCustomer);
@@ -133,7 +133,7 @@ public class CustomersControllerTest {
 
 	@Test
 	public void put_updatesAndReturnsUpdatedObjWith204() throws Exception {
-		CustomersEntity cliente = new CustomersEntity(1l, "Maria", LocalDateTime.now());
+		CustomersEntity cliente = new CustomersEntity(1L, "Maria", LocalDateTime.now());
 		CustomersDTO dto = new CustomersDTO(cliente.getId(), cliente.getName(), cliente.getBirthDate());
 
 		Optional<CustomersEntity> cust = Optional.ofNullable(cliente);
@@ -151,7 +151,7 @@ public class CustomersControllerTest {
 	
 	@Test
 	public void put_updatesAndReturnsUpdatedObjWith400() throws Exception {
-		Long idCliente = 100l;
+		Long idCliente = 100L;
 
 		mockMvc.perform(put("/v1/customers/1", idCliente)
 				.contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -189,12 +189,12 @@ public class CustomersControllerTest {
 
 	@Test
 	public void deleteCustomer() throws Exception {
-		Long idCliente = 100l;
+		Long idCliente = 100L;
 
 		Optional<CustomersEntity> cust = Optional.ofNullable(mockCustomersEntity());
 
 		when(repository.findById(Mockito.anyLong())).thenReturn(cust);
-		doNothing().when(repository).deleteById(100l);
+		doNothing().when(repository).deleteById(100L);
 
 		mockMvc.perform(delete("/v1/customers/{id}", idCliente))
 				.andExpect(status().isNoContent());
@@ -202,7 +202,7 @@ public class CustomersControllerTest {
 
 	private CustomersEntity mockCustomersEntity() {
 		CustomersEntity cliente = new CustomersEntity();
-		cliente.setId(100l);
+		cliente.setId(100L);
 		cliente.setName("Renan");
 		cliente.setBirthDate(LocalDateTime.of(1992, 07, 20, 23, 59));
 		return cliente;

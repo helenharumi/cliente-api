@@ -10,6 +10,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -67,10 +70,41 @@ class CustomersServiceTest {
 
     @Test
     void deleteById() {
+        CustomersEntity customers = new CustomersEntity();
+        Mockito.when(repository.findById(1L)).thenReturn(Optional.of(customers));
+
+        service.deleteById(1L);
+
+        Mockito.verify(repository,Mockito.times(1)).deleteById(1L);
+    }
+
+    @Test
+    void deleteByIdIllegal() {
+        CustomersEntity customers = new CustomersEntity();
+        Mockito.when(repository.findById(null)).thenReturn(Optional.of(customers));
+
+        Mockito.doThrow(new IllegalArgumentException()).when(repository).deleteById(null);
+
+        assertThrows(IllegalArgumentException.class, () ->  service.deleteById(null));
     }
 
     @Test
     void findAll() {
+        CustomersEntity customersEntity = new CustomersEntity();
+        customersEntity.setName("João");
+        customersEntity.setId(1L);
+        customersEntity.setBirthDate(LocalDateTime.of(1990,5,18, 23, 0));
+
+        List<CustomersEntity> customers = new ArrayList<>();
+        customers.add(customersEntity);
+
+        Mockito.when(repository.findAll()).thenReturn(customers);
+
+        List<CustomersEntity> response = service.findAll();
+
+        assertEquals(response.get(0).getName(), "João");
+        assertEquals(response.get(0).getId(), 1L);
+        assertEquals(response.get(0).getBirthDate(), LocalDateTime.of(1990, 5, 18, 23, 0));
     }
 
     @Test

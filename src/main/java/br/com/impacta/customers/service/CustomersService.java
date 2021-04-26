@@ -1,14 +1,13 @@
 package br.com.impacta.customers.service;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import br.com.impacta.customers.entity.CustomersEntity;
 import br.com.impacta.customers.exceptions.ObjectNotFoundException;
 import br.com.impacta.customers.repository.CustomersRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CustomersService {
