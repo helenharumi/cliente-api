@@ -108,6 +108,22 @@ class CustomersServiceTest {
     }
 
     @Test
-    void findByName() {
+    void findByNameShouldThrowExceptionWhenEmpty() {
+
+       assertThrows(IllegalArgumentException.class, () -> service.findByName(""));
+    }
+
+    @Test
+    void findByNameSucess() {
+        List<CustomersEntity> customers = new ArrayList<>();
+        CustomersEntity customersEntity = new CustomersEntity();
+        customersEntity.setName("João");
+
+        customers.add(customersEntity);
+
+        Mockito.when(repository.findByNameIgnoreCase("João")).thenReturn(customers);
+        List<CustomersEntity> response = service.findByName("João");
+
+        assertEquals(response.get(0).getName(), "João");
     }
 }
