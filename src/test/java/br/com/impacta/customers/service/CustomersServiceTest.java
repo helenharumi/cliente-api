@@ -65,7 +65,27 @@ class CustomersServiceTest {
     }
 
     @Test
-    void update() {
+    void updateSucess() {
+        CustomersEntity customers = new CustomersEntity();
+        customers.setId(1L);
+        customers.setName("João");
+        customers.setBirthDate(LocalDateTime.of(1990,5,18, 23, 0));
+
+        Mockito.when(repository.findById(1L)).thenReturn(Optional.of(customers));
+        Mockito.when(repository.save(customers)).thenReturn(customers);
+
+        CustomersEntity response = service.update(customers);
+
+        assertEquals(1L, response.getId());
+    }
+
+    @Test
+    void updateObjectNotFoundException() {
+        CustomersEntity customers = new CustomersEntity();
+        customers.setId(1L);
+        Mockito.when(repository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(ObjectNotFoundException.class, () -> service.update(customers));
     }
 
     @Test
