@@ -15,6 +15,12 @@ public class CustomersService {
 	@Autowired
 	private CustomersRepository repository;
 
+	
+	@Transactional(readOnly = true)
+	public Page<CustomersEntity> findAllPaged(PageRequest page) {
+		return repository.findAll(page);
+	}
+	
 	public CustomersEntity save(CustomersEntity customer) {
 		return repository.save(customer);
 	}
@@ -44,10 +50,6 @@ public class CustomersService {
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Failed to delete the client");
 		}
-	}
-
-	public List<CustomersEntity> findAll() {
-		return repository.findAll();
 	}
 
 	public List<CustomersEntity> findByName(String name) {
