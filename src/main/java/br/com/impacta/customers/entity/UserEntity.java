@@ -23,7 +23,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
 @Table(name = "tb_user")
-public class User implements UserDetails, Serializable {
+public class UserEntity implements UserDetails, Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -39,12 +39,12 @@ public class User implements UserDetails, Serializable {
 	
 	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "tb_user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id") )
-	private Set<Role> roles = new HashSet<>();
+	private Set<RoleEntity> roles = new HashSet<>();
 	
 	
-	public User() {}
+	public UserEntity() {}
 
-	public User(Long id, String firstName, String lastName, String email, String password) {
+	public UserEntity(Long id, String firstName, String lastName, String email, String password) {
 		super();
 		this.id = id;
 		this.firstName = firstName;
@@ -89,7 +89,7 @@ public class User implements UserDetails, Serializable {
 		this.password = password;
 	}
 
-	public Set<Role> getRoles() {
+	public Set<RoleEntity> getRoles() {
 		return roles;
 	}
 
@@ -142,7 +142,7 @@ public class User implements UserDetails, Serializable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		User other = (User) obj;
+		UserEntity other = (UserEntity) obj;
 		if (id == null) {
 			if (other.id != null)
 				return false;

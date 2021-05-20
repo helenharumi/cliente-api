@@ -34,7 +34,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter{
 
 	private static final String[] OPERATOR_OD_ADMIN = { "/v1/customers/**" };
 	
-	private static final String[] ADMIN = { "/users/**"};
+	private static final String[] ADMIN = { "/v1/users/**"};
 
 	@Override
 	public void configure(ResourceServerSecurityConfigurer resources) throws Exception {

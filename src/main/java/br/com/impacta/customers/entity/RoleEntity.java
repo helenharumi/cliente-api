@@ -10,7 +10,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "tb_role")
-public class Role implements Serializable{
+public class RoleEntity implements Serializable{
 
 	private static final long serialVersionUID = 1L;
 	
@@ -20,9 +20,9 @@ public class Role implements Serializable{
 	
 	private String authority;
 	
-	public Role() {}
+	public RoleEntity() {}
 
-	public Role(Long id, String authority) {
+	public RoleEntity(Long id, String authority) {
 		super();
 		this.id = id;
 		this.authority = authority;
@@ -60,7 +60,7 @@ public class Role implements Serializable{
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Role other = (Role) obj;
+		RoleEntity other = (RoleEntity) obj;
 		if (id == null) {
 			if (other.id != null)
 				return false;

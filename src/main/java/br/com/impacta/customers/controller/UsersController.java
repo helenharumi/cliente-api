@@ -4,6 +4,11 @@ import java.net.URI;
 
 import javax.validation.Valid;
 
+import br.com.impacta.customers.dto.CustomersDTO;
+import br.com.impacta.customers.entity.UserEntity;
+import org.h2.engine.User;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,11 +34,14 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 @RestController
-@RequestMapping(value = "/users")
+@RequestMapping(value = "/v1/users")
 public class UsersController {
 
 	@Autowired
 	private UserService service;
+
+	@Autowired
+	private ModelMapper modelMapper;
 
 	@ApiOperation(value = "Find all users")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Success"),
@@ -50,9 +58,12 @@ public class UsersController {
 		
 		PageRequest pageRequest = PageRequest.of(page, linesPerPage, Direction.valueOf(direction), orderBy);
 		
-		Page<UserDTO> list = service.findAllPaged(pageRequest);
-		
-		return ResponseEntity.ok().body(list);
+		Page<UserEntity> list = service.findAllPaged(pageRequest);
+
+		Page<UserDTO> listDto =  modelMapper.map(list, new TypeToken<Page<CustomersDTO>>() {
+		}.getType());
+
+		return ResponseEntity.ok().body(listDto);
 	}
 
 	@ApiOperation(value = "Return an object")
@@ -64,7 +75,8 @@ public class UsersController {
 			@ApiResponse(code = 500, message = "an exception was thrown"), })
 	@GetMapping(value = "/{id}")
 	public ResponseEntity<UserDTO> findById(@PathVariable Long id) {
-		UserDTO dto = service.findById(id);
+		UserEntity entity = service.findById(id);
+		UserDTO dto = modelMapper.map(entity, UserDTO.class);
 		return ResponseEntity.ok().body(dto);
 	}
 
@@ -76,10 +88,11 @@ public class UsersController {
 			@ApiResponse(code = 500, message = "an exception was thrown"), })
 	@PostMapping
 	public ResponseEntity<UserDTO> insert(@Valid @RequestBody UserInsertDTO dto) {
-		UserDTO newDto = service.insert(dto);
-		URI uri = ServletUriComponentsBuilder.fromCurrentContextPath().path("/{id}").buildAndExpand(newDto.getId())
+		UserEntity user = service.insert(service.copyDtoToEntity(dto, new UserEntity()));
+		UserDTO dtoSave = modelMapper.map(user, UserDTO.class);
+		URI uri = ServletUriComponentsBuilder.fromCurrentContextPath().path("/{id}").buildAndExpand(dtoSave.getId())
 				.toUri();
-		return ResponseEntity.created(uri).body(newDto);
+		return ResponseEntity.created(uri).body(dtoSave);
 	}
 
 	@ApiOperation(value = "Update an object")
@@ -91,8 +104,10 @@ public class UsersController {
 			@ApiResponse(code = 500, message = "an exception was thrown"), })
 	@PutMapping(value = "/{id}")
 	public ResponseEntity<UserDTO> update(@PathVariable Long id, @Valid @RequestBody UserUpdateDTO dto) {
-		UserDTO newDto = service.update(id, dto);
-		return ResponseEntity.ok().body(newDto);
+		UserEntity userEntityUpdate = service.copyDtoToEntity(dto, new UserEntity());
+		UserEntity userEntitySave =  service.update(id, userEntityUpdate);
+		UserDTO dtoSave = modelMapper.map(userEntitySave, UserDTO.class);
+		return ResponseEntity.ok().body(dtoSave);
 	}
 
 	@ApiOperation(value = "Delete an object")

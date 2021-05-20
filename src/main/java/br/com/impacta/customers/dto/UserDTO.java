@@ -7,7 +7,7 @@ import java.util.Set;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
-import br.com.impacta.customers.entity.User;
+import br.com.impacta.customers.entity.UserEntity;
 
 public class UserDTO implements Serializable {
 
@@ -35,7 +35,7 @@ public class UserDTO implements Serializable {
 		this.email = email;
 	}
 	
-	public UserDTO(User entity) {
+	public UserDTO(UserEntity entity) {
 		id = entity.getId();
 		firstName = entity.getFirstName();
 		lastName = entity.getLastName();

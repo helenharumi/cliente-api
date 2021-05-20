@@ -2,6 +2,7 @@ package br.com.impacta.customers.service;
 
 import java.util.Optional;
 
+import javax.persistence.Entity;
 import javax.persistence.EntityNotFoundException;
 
 import org.slf4j.Logger;
@@ -22,12 +23,13 @@ import br.com.impacta.customers.dto.RoleDTO;
 import br.com.impacta.customers.dto.UserDTO;
 import br.com.impacta.customers.dto.UserInsertDTO;
 import br.com.impacta.customers.dto.UserUpdateDTO;
-import br.com.impacta.customers.entity.Role;
-import br.com.impacta.customers.entity.User;
+import br.com.impacta.customers.entity.RoleEntity;
+import br.com.impacta.customers.entity.UserEntity;
 import br.com.impacta.customers.exceptions.DataBaseException;
 import br.com.impacta.customers.exceptions.ObjectNotFoundException;
 import br.com.impacta.customers.repository.RoleRepository;
 import br.com.impacta.customers.repository.UserRepository;
+import org.springframework.web.client.ResourceAccessException;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -44,37 +46,33 @@ public class UserService implements UserDetailsService {
 	private RoleRepository roleRepository;
 
 	@Transactional(readOnly = true)
-	public Page<UserDTO> findAllPaged(PageRequest page) {
-		Page<User> list = repository.findAll(page);
-		return list.map(x -> new UserDTO(x));
+	public Page<UserEntity> findAllPaged(PageRequest page) {
+		return repository.findAll(page);
 	}
 
 	@Transactional(readOnly = true)
-	public UserDTO findById(Long id) {
-		Optional<User> obj = repository.findById(id);
-		User entity = obj.orElseThrow(() -> new ObjectNotFoundException("Entity not found"));
-		return new UserDTO(entity);
+	public UserEntity findById(Long id) {
+		Optional<UserEntity> obj = repository.findById(id);
+		UserEntity entity = obj.orElseThrow(() -> new ObjectNotFoundException("Entity not found"));
+		return entity;
 	}
 
 	@Transactional
-	public UserDTO insert(UserInsertDTO dto) {
-		User entity = new User();
-		copyDtoToEntity(dto, entity);
-		entity.setPassword(passwordEncoder.encode(dto.getPassword()));
-		entity = repository.save(entity);
-		return new UserDTO(entity);
+	public UserEntity insert(UserEntity userEntity) {
+		userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
+		return repository.save(userEntity);
 	}
 
 	@Transactional
-	public UserDTO update(Long id, UserUpdateDTO dto) {
-		try {
-			User entity = repository.getOne(id);
-			copyDtoToEntity(dto, entity);
-			entity = repository.save(entity);
-			return new UserDTO(entity);
-		} catch (EntityNotFoundException e) {
+	public UserEntity update(Long id, UserEntity entityUpdate) {
+
+		UserEntity entity = repository.getOne(id);
+		if(entity == null){
 			throw new ObjectNotFoundException("Id not found " + id);
 		}
+		entityUpdate.setId(id);
+		return repository.save(entityUpdate);
+
 
 	}
 
@@ -88,7 +86,7 @@ public class UserService implements UserDetailsService {
 		}
 	}
 
-	private void copyDtoToEntity(UserDTO dto, User entity) {
+	public UserEntity copyDtoToEntity(UserDTO dto, UserEntity entity) {
 		entity.setFirstName(dto.getFirstName());
 		entity.setLastName(dto.getLastName());
 		entity.setEmail(dto.getEmail());
@@ -96,15 +94,16 @@ public class UserService implements UserDetailsService {
 		entity.getRoles().clear();
 
 		for (RoleDTO roleDto : dto.getRoles()) {
-			Role role = roleRepository.getOne(roleDto.getId());
+			RoleEntity role = roleRepository.getOne(roleDto.getId());
 			entity.getRoles().add(role);
 		}
 
+		return entity;
 	}
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		User user = repository.findByEmail(username);
+		UserEntity user = repository.findByEmail(username);
 		if(user == null){
 			logger.error("User not found", username);
 			throw new UsernameNotFoundException("Email not found");

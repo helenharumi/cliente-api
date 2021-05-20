@@ -56,17 +56,17 @@ public class CustomersController {
 	public ResponseEntity<Page<CustomersDTO>> findAll(@RequestParam(value = "page", defaultValue = "0") Integer page,
 			@RequestParam(value = "linesPerPage", defaultValue = "12") Integer linesPerPage,
 			@RequestParam(value = "direction", defaultValue = "ASC") String direction ,
-			@RequestParam(value = "orderBy", defaultValue = "firstName") String orderBy
+			@RequestParam(value = "orderBy", defaultValue = "name") String orderBy
 			) {
 		
 		PageRequest pageRequest = PageRequest.of(page, linesPerPage, Direction.valueOf(direction), orderBy);
 		
-		Page<CustomersEntity> listDto = service.findAllPaged(pageRequest);
+		Page<CustomersEntity> list = service.findAllPaged(pageRequest);
 		
-		Page<CustomersDTO> list =  modelMapper.map(listDto, new TypeToken<Page<CustomersDTO>>() {
+		Page<CustomersDTO> listDto =  modelMapper.map(list, new TypeToken<Page<CustomersDTO>>() {
 		}.getType());
 		
-		return ResponseEntity.ok().body(list);
+		return ResponseEntity.ok().body(listDto);
 	}
 
 	@ApiOperation(value = "Insert a new object into the database")
@@ -105,10 +105,11 @@ public class CustomersController {
 	@GetMapping(value = "/findByName/{name}")
 	public ResponseEntity<List<CustomersDTO>> findByName(@PathVariable @NotBlank String name) {
 
-		List<CustomersEntity> obj = service.findByName(name);
+		List<CustomersEntity> list = service.findByName(name);
 		
-		List<CustomersDTO> listDto = modelMapper.map(obj, new TypeToken<List<CustomersDTO>>() {
-		}.getType());
+		TypeToken<List<CustomersEntity>> typeToken = new TypeToken<>() {};
+		
+		List<CustomersDTO> listDto = modelMapper.map(list, typeToken.getType() );
 		
 		return ResponseEntity.ok().body(listDto);
 	}

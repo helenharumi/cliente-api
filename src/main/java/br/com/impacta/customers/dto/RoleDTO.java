@@ -2,7 +2,7 @@ package br.com.impacta.customers.dto;
 
 import java.io.Serializable;
 
-import br.com.impacta.customers.entity.Role;
+import br.com.impacta.customers.entity.RoleEntity;
 
 public class RoleDTO implements Serializable {
 
@@ -19,7 +19,7 @@ public class RoleDTO implements Serializable {
 		this.authority = authority;
 	}
 	
-	public RoleDTO(Role role) {
+	public RoleDTO(RoleEntity role) {
 		super();
 		id = role.getId();
 		authority = role.getAuthority();
