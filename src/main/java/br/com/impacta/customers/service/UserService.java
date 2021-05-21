@@ -70,20 +70,20 @@ public class UserService implements UserDetailsService {
 		if(entity == null){
 			throw new ObjectNotFoundException("Id not found " + id);
 		}
+		entityUpdate.setPassword(passwordEncoder.encode(entityUpdate.getPassword()));
 		entityUpdate.setId(id);
 		return repository.save(entityUpdate);
-
 
 	}
 
 	public void delete(Long id) {
-		try {
-			repository.deleteById(id);
-		} catch (EmptyResultDataAccessException e) {
-			throw new ObjectNotFoundException ("Id not found " + id);
-		} catch (DataIntegrityViolationException e) {
-			throw new DataBaseException("Integrity violation");
+
+		UserEntity entity = repository.getOne(id);
+		if(entity == null){
+			throw new ObjectNotFoundException("Id not found " + id);
 		}
+		repository.deleteById(id);
+
 	}
 
 	public UserEntity copyDtoToEntity(UserDTO dto, UserEntity entity) {
@@ -102,10 +102,10 @@ public class UserService implements UserDetailsService {
 	}
 
 	@Override
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		UserEntity user = repository.findByEmail(username);
+	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+		UserEntity user = repository.findByEmail(email);
 		if(user == null){
-			logger.error("User not found", username);
+			logger.error("User not found", email);
 			throw new UsernameNotFoundException("Email not found");
 		}
 		return user;

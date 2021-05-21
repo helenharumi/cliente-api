@@ -34,7 +34,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 @RestController
-@RequestMapping(value = "/v1/users")
+@RequestMapping(value = "/users")
 public class UsersController {
 
 	@Autowired
@@ -88,7 +88,9 @@ public class UsersController {
 			@ApiResponse(code = 500, message = "an exception was thrown"), })
 	@PostMapping
 	public ResponseEntity<UserDTO> insert(@Valid @RequestBody UserInsertDTO dto) {
-		UserEntity user = service.insert(service.copyDtoToEntity(dto, new UserEntity()));
+		UserEntity user = service.copyDtoToEntity(dto, new UserEntity());
+		user.setPassword(dto.getPassword());
+		service.insert(user);
 		UserDTO dtoSave = modelMapper.map(user, UserDTO.class);
 		URI uri = ServletUriComponentsBuilder.fromCurrentContextPath().path("/{id}").buildAndExpand(dtoSave.getId())
 				.toUri();
@@ -105,8 +107,9 @@ public class UsersController {
 	@PutMapping(value = "/{id}")
 	public ResponseEntity<UserDTO> update(@PathVariable Long id, @Valid @RequestBody UserUpdateDTO dto) {
 		UserEntity userEntityUpdate = service.copyDtoToEntity(dto, new UserEntity());
-		UserEntity userEntitySave =  service.update(id, userEntityUpdate);
-		UserDTO dtoSave = modelMapper.map(userEntitySave, UserDTO.class);
+		userEntityUpdate.setPassword(dto.getPassword());
+		userEntityUpdate =  service.update(id, userEntityUpdate);
+		UserDTO dtoSave = modelMapper.map(userEntityUpdate, UserDTO.class);
 		return ResponseEntity.ok().body(dtoSave);
 	}
 
