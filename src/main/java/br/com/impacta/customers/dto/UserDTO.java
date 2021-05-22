@@ -8,6 +8,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
 import br.com.impacta.customers.entity.UserEntity;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 public class UserDTO implements Serializable {
 
@@ -23,7 +24,7 @@ public class UserDTO implements Serializable {
 	private String email;
 	
 	Set<RoleDTO> roles = new HashSet<>();
-	
+
 	public UserDTO() {
 	
 	}
@@ -78,5 +79,7 @@ public class UserDTO implements Serializable {
 	public Set<RoleDTO> getRoles() {
 		return roles;
 	}
+
+
 
 }

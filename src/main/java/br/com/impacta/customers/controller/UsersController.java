@@ -4,11 +4,11 @@ import java.net.URI;
 
 import javax.validation.Valid;
 
-import br.com.impacta.customers.dto.CustomersDTO;
 import br.com.impacta.customers.entity.UserEntity;
-import org.h2.engine.User;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.modelmapper.config.Configuration;
+import org.modelmapper.convention.NamingConventions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -59,9 +59,7 @@ public class UsersController {
 		PageRequest pageRequest = PageRequest.of(page, linesPerPage, Direction.valueOf(direction), orderBy);
 		
 		Page<UserEntity> list = service.findAllPaged(pageRequest);
-
-		Page<UserDTO> listDto =  modelMapper.map(list, new TypeToken<Page<CustomersDTO>>() {
-		}.getType());
+		Page<UserDTO> listDto =  list.map( userEntity -> new UserDTO(userEntity));
 
 		return ResponseEntity.ok().body(listDto);
 	}
@@ -76,7 +74,7 @@ public class UsersController {
 	@GetMapping(value = "/{id}")
 	public ResponseEntity<UserDTO> findById(@PathVariable Long id) {
 		UserEntity entity = service.findById(id);
-		UserDTO dto = modelMapper.map(entity, UserDTO.class);
+		UserDTO dto = new UserDTO(entity);
 		return ResponseEntity.ok().body(dto);
 	}
 
@@ -91,7 +89,7 @@ public class UsersController {
 		UserEntity user = service.copyDtoToEntity(dto, new UserEntity());
 		user.setPassword(dto.getPassword());
 		service.insert(user);
-		UserDTO dtoSave = modelMapper.map(user, UserDTO.class);
+		UserDTO dtoSave = new UserDTO(user);
 		URI uri = ServletUriComponentsBuilder.fromCurrentContextPath().path("/{id}").buildAndExpand(dtoSave.getId())
 				.toUri();
 		return ResponseEntity.created(uri).body(dtoSave);
@@ -109,7 +107,7 @@ public class UsersController {
 		UserEntity userEntityUpdate = service.copyDtoToEntity(dto, new UserEntity());
 		userEntityUpdate.setPassword(dto.getPassword());
 		userEntityUpdate =  service.update(id, userEntityUpdate);
-		UserDTO dtoSave = modelMapper.map(userEntityUpdate, UserDTO.class);
+		UserDTO dtoSave = new UserDTO(userEntityUpdate);
 		return ResponseEntity.ok().body(dtoSave);
 	}
 

@@ -70,7 +70,10 @@ public class UserService implements UserDetailsService {
 		if(entity == null){
 			throw new ObjectNotFoundException("Id not found " + id);
 		}
-		entityUpdate.setPassword(passwordEncoder.encode(entityUpdate.getPassword()));
+		if(entityUpdate.getPassword() != null){
+			entityUpdate.setPassword(passwordEncoder.encode(entityUpdate.getPassword()));
+		}
+
 		entityUpdate.setId(id);
 		return repository.save(entityUpdate);
 
@@ -94,7 +97,8 @@ public class UserService implements UserDetailsService {
 		entity.getRoles().clear();
 
 		for (RoleDTO roleDto : dto.getRoles()) {
-			RoleEntity role = roleRepository.getOne(roleDto.getId());
+			Optional<RoleEntity> optional = roleRepository.findById(roleDto.getId());
+			RoleEntity role = optional.orElseThrow(() -> new ObjectNotFoundException("Entity not found"));
 			entity.getRoles().add(role);
 		}
 
