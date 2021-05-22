@@ -1,13 +1,21 @@
 package br.com.impacta.customers.service;
 
-import br.com.impacta.customers.entity.CustomersEntity;
-import br.com.impacta.customers.exceptions.ObjectNotFoundException;
-import br.com.impacta.customers.repository.CustomersRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import br.com.impacta.customers.entity.CustomersEntity;
+import br.com.impacta.customers.exceptions.ObjectNotFoundException;
+import br.com.impacta.customers.repository.CustomersRepository;
+
+
 
 @Service
 public class CustomersService {
@@ -15,6 +23,12 @@ public class CustomersService {
 	@Autowired
 	private CustomersRepository repository;
 
+	
+	@Transactional(readOnly = true)
+	public Page<CustomersEntity> findAllPaged(PageRequest page) {
+		return repository.findAll(page);
+	}
+	
 	public CustomersEntity save(CustomersEntity customer) {
 		return repository.save(customer);
 	}
@@ -44,10 +58,6 @@ public class CustomersService {
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Failed to delete the client");
 		}
-	}
-
-	public List<CustomersEntity> findAll() {
-		return repository.findAll();
 	}
 
 	public List<CustomersEntity> findByName(String name) {

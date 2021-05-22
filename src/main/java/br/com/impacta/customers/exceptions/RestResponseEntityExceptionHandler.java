@@ -29,5 +29,18 @@ public class RestResponseEntityExceptionHandler {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 	}
 
+	@ExceptionHandler(DataBaseException.class)
+	public ResponseEntity<DefaultError> entityNotFound(DataBaseException e, HttpServletRequest request) {
+		HttpStatus status = HttpStatus.BAD_REQUEST;
+		DefaultError err = new DefaultError(status.value(), e.getMessage(), System.currentTimeMillis());
+		return ResponseEntity.status(status).body(err);
+	}
+
+	@ExceptionHandler(ResourceExistsException.class)
+	public ResponseEntity<DefaultError> entityNotFound(ResourceExistsException e, HttpServletRequest request) {
+		HttpStatus status = HttpStatus.CONFLICT;
+		DefaultError err = new DefaultError(status.value(), e.getMessage(), System.currentTimeMillis());
+		return ResponseEntity.status(status).body(err);
+	}
 
 }

@@ -1,8 +1,16 @@
 package br.com.impacta.customers.service;
 
-import br.com.impacta.customers.entity.CustomersEntity;
-import br.com.impacta.customers.exceptions.ObjectNotFoundException;
-import br.com.impacta.customers.repository.CustomersRepository;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import br.com.impacta.customers.controller.factory.UserEntityTestFactory;
+import br.com.impacta.customers.entity.UserEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -10,13 +18,13 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import br.com.impacta.customers.entity.CustomersEntity;
+import br.com.impacta.customers.exceptions.ObjectNotFoundException;
+import br.com.impacta.customers.repository.CustomersRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 @ExtendWith(MockitoExtension.class)
 class CustomersServiceTest {
@@ -115,16 +123,16 @@ class CustomersServiceTest {
         customersEntity.setId(1L);
         customersEntity.setBirthDate(LocalDateTime.of(1990,5,18, 23, 0));
 
-        List<CustomersEntity> customers = new ArrayList<>();
-        customers.add(customersEntity);
+        PageRequest pageRequest = PageRequest.of(0, 12, Sort.Direction.valueOf("ASC"), "name");
 
-        Mockito.when(repository.findAll()).thenReturn(customers);
+        Page<CustomersEntity> pages = new PageImpl<>(List.of(customersEntity));
 
-        List<CustomersEntity> response = service.findAll();
+        when(repository.findAll(pageRequest)).thenReturn(pages);
 
-        assertEquals(response.get(0).getName(), "João");
-        assertEquals(response.get(0).getId(), 1L);
-        assertEquals(response.get(0).getBirthDate(), LocalDateTime.of(1990, 5, 18, 23, 0));
+        Page<CustomersEntity> entitiesPages =  service.findAllPaged(pageRequest);
+
+        assertEquals(entitiesPages.getTotalPages(), 1);
+        assertEquals(entitiesPages.getTotalElements(), 1L);;
     }
 
     @Test

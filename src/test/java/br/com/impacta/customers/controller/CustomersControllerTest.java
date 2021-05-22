@@ -1,33 +1,53 @@
 package br.com.impacta.customers.controller;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import br.com.impacta.customers.controller.factory.CustomersEntityTestFactory;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.json.JacksonJsonParser;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+
 import br.com.impacta.customers.dto.CustomersDTO;
 import br.com.impacta.customers.dto.CustomersInsertDTO;
 import br.com.impacta.customers.entity.CustomersEntity;
 import br.com.impacta.customers.repository.CustomersRepository;
 import br.com.impacta.customers.service.CustomersService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
-import java.nio.charset.Charset;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-@SpringBootTest()
+@SpringBootTest
 @AutoConfigureMockMvc
 public class CustomersControllerTest {
 
@@ -46,165 +66,190 @@ public class CustomersControllerTest {
 	public static final MediaType APPLICATION_JSON_UTF8 = new MediaType(MediaType.APPLICATION_JSON.getType(),
 			MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
 
+	@Value("${security.oauth2.client.client-id}")
+	private String clientId;
+
+	@Value("${security.oauth2.client.client-secret}")
+	private String clientSecret;
+	
+	private String operatorUserName;
+	private String operatorPassword;
+	public  String URL_CUSTOMER = "/v1/customers";
+	private String token;
+	
+	@BeforeEach
+	void setUp() throws Exception {
+		
+		operatorUserName = "alex@gmail.com";
+		operatorPassword = "123456";
+		token = obtainAccessToken(operatorUserName, operatorPassword);
+
+	}
+
 	@Test
 	public void post_saveCustomerAndReturnTheResource201() throws Exception {
 
-		CustomersInsertDTO dto = new CustomersInsertDTO(mockCustomersEntity().getName(), mockCustomersEntity().getBirthDate());
-
+		CustomersInsertDTO dto = CustomersEntityTestFactory.createCustomerInsertDTO("Client");
 		objectMapper = new ObjectMapper();
 		ObjectWriter ow = objectMapper.writer().withDefaultPrettyPrinter();
 		String requestJson = ow.writeValueAsString(dto);
 
-		when(service.save(Mockito.any())).thenReturn(mockCustomersEntity());
-
-		mockMvc.perform(post("/v1/customers")
+		when(service.save(any())).thenReturn(CustomersEntityTestFactory.createCustomer(1L, "Client"));
+		
+		ResultActions result = mockMvc.perform(post(URL_CUSTOMER)
+				.header("Authorization", "Bearer " + token)
 				.contentType(APPLICATION_JSON_UTF8)
-				.content(requestJson))
-				.andExpect(status().isCreated()).andReturn();
+				.content(requestJson));
+
+		result.andExpect(status().isCreated());
+	
 	}
 
 	@Test
-	public void get_findCustomerByIdSucess() throws Exception {
-		Long idCliente = 100L;
+	public void get_findCustomerByIdSuccess() throws Exception {
+		Long clientId = 100L;
 
-		Optional<CustomersEntity> cust = Optional.ofNullable(mockCustomersEntity());
+		Optional<CustomersEntity> customer = Optional.ofNullable(CustomersEntityTestFactory.createCustomer(clientId, "Client"));
 
-		when(repository.findById(Mockito.anyLong())).thenReturn(cust);
+		when(repository.findById(anyLong())).thenReturn(customer);
 
-		mockMvc.perform(get("/v1/customers/{id}", idCliente)
-				.contentType(MediaType.APPLICATION_JSON_VALUE)
-				.accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get(URL_CUSTOMER + "/{id}", clientId)
+				.contentType(APPLICATION_JSON_UTF8)
+				.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().is2xxSuccessful());
 	}
 	
 	@Test
 	public void get_findCustomerByIdNotFound() throws Exception {
-		Long idCliente = 100L;
+		Long clientId = 100L;
 
-		mockMvc.perform(get("/v1/customers/{id}", idCliente)
-				.contentType(MediaType.APPLICATION_JSON_VALUE)
-				.accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get(URL_CUSTOMER + "/{id}", clientId)
+				.contentType(APPLICATION_JSON_UTF8)
+				.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isNotFound());
 	}
 
 	@Test
-	public void get_findCustomerByNameSucess() throws Exception {
-		String nameCli = "Maria";
+	public void get_findCustomerByNameSuccess() throws Exception {
+		String clientName = "Client";
 		List<CustomersEntity> listCustomer = new ArrayList<>();
-		CustomersEntity client = new CustomersEntity(1L, "Maria", LocalDateTime.now());
-		listCustomer.add(client);
+		listCustomer.add(CustomersEntityTestFactory.createCustomer(1L, clientName));
 
-		when(repository.findByNameIgnoreCase(Mockito.anyString())).thenReturn(listCustomer);
+		when(repository.findByNameIgnoreCase(anyString())).thenReturn(listCustomer);
 
-		mockMvc.perform(get("/v1/customers/findByName/{name}", nameCli)
-				.contentType(MediaType.APPLICATION_JSON_VALUE)
-				.accept(MediaType.APPLICATION_JSON)
+		mockMvc.perform(get(URL_CUSTOMER + "/findByName/{name}", clientName)
+				.contentType(APPLICATION_JSON_UTF8)
+				.accept(APPLICATION_JSON_UTF8)
 				.content(objectMapper.writeValueAsBytes(listCustomer)))
 				.andExpect(status().is2xxSuccessful());
 	}
 	
 	@Test
-	public void get_findCustomerByNameIllegalArgNameEmpty() throws Exception {
-		mockMvc.perform(get("/v1/customers/findByName/{name}", "")
-				.contentType(MediaType.APPLICATION_JSON_VALUE)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
-	}
-	
-//	@Test
-//	public void get_findCustomerByNameIllegalArgNameNull() throws Exception {
-//		mockMvc.perform(get("/v1/customers/findByName/{name}", null)
-//				.contentType(MediaType.APPLICATION_JSON_VALUE)
-//				.accept(MediaType.APPLICATION_JSON))
-//				.andExpect(status().isBadRequest());
-//	}
-//	
-	@Test
 	public void get_findCustomerByNameNotFound() throws Exception {
-		String nameCli = "Maria";
+		String clientName = "Client";
 
-		when(repository.findByNameIgnoreCase(Mockito.anyString())).thenReturn(null);
+		when(repository.findByNameIgnoreCase(anyString())).thenReturn(null);
 
-		mockMvc.perform(get("/v1/customers/findByName/{name}", nameCli)
-				.contentType(MediaType.APPLICATION_JSON_VALUE)
-				.accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get(URL_CUSTOMER + "/findByName/{name}", clientName)
+				.contentType(APPLICATION_JSON_UTF8)
+				.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isNotFound());
 	}
 
 	@Test
 	public void put_updatesAndReturnsUpdatedObjWith204() throws Exception {
-		CustomersEntity cliente = new CustomersEntity(1L, "Maria", LocalDateTime.now());
-		CustomersDTO dto = new CustomersDTO(cliente.getId(), cliente.getName(), cliente.getBirthDate());
 
-		Optional<CustomersEntity> cust = Optional.ofNullable(cliente);
+		CustomersEntity client = CustomersEntityTestFactory.createCustomer(1L, "Client");
+		CustomersDTO dto = CustomersEntityTestFactory.createCustomerDTO(client.getId(), client.getName());
 
-		when(repository.findById(Mockito.anyLong())).thenReturn(cust);
-		when(service.save(Mockito.any(CustomersEntity.class))).thenReturn(cliente);
+		Optional<CustomersEntity> customersEntity = Optional.ofNullable(client);
 
-		mockMvc.perform(put("/v1/customers/1", cliente)
-				.contentType(MediaType.APPLICATION_JSON_VALUE)
-				.accept(MediaType.APPLICATION_JSON)
-				.characterEncoding("UTF-8")
-				.content(objectMapper.writeValueAsBytes(dto)))
-				.andExpect(status().is2xxSuccessful());
+		when(repository.findById(Mockito.anyLong())).thenReturn(customersEntity);
+		when(service.save(Mockito.any(CustomersEntity.class))).thenReturn(client);
+
+		ResultActions result = mockMvc.perform(put(URL_CUSTOMER + "/{id}", client.getId())
+				.header("Authorization", "Bearer " + token)
+				.content(objectMapper.writeValueAsString(dto))
+				.contentType(APPLICATION_JSON_UTF8)
+				.accept(APPLICATION_JSON_UTF8));
+		
+					
+		result.andExpect(status().is2xxSuccessful());
 	}
 	
 	@Test
-	public void put_updatesAndReturnsUpdatedObjWith400() throws Exception {
-		Long idCliente = 100L;
-
-		mockMvc.perform(put("/v1/customers/1", idCliente)
-				.contentType(MediaType.APPLICATION_JSON_VALUE)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
-	}
-
-	@Test
 	public void post_submitsInvalidCustomer_WithEmptyMake_Returns400() throws Exception {
-		CustomersEntity cliente = new CustomersEntity();
+
+		CustomersEntity client = new CustomersEntity();
 		CustomersDTO dto = new CustomersDTO();
 
-		when(service.save(Mockito.any(CustomersEntity.class))).thenReturn(cliente);
+		when(service.save(any(CustomersEntity.class))).thenReturn(client);
 
-		mockMvc.perform(post("/v1/customers/")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(dto)))
-				.andExpect(status().isBadRequest());
+		ResultActions result = mockMvc.perform(post(URL_CUSTOMER)
+				.header("Authorization", "Bearer " + token)
+				.content(objectMapper.writeValueAsString(dto))
+				.contentType(APPLICATION_JSON_UTF8));
+
+		result.andExpect(status().isBadRequest());
+
 	}
 
 	@Test
 	public void get_allCustomers_returnsOkWithListOfCustomers() throws Exception {
 
-		CustomersEntity c1 = new CustomersEntity();
-		CustomersEntity c2 = new CustomersEntity();
+		List<CustomersEntity> list = List.of(
+				CustomersEntityTestFactory.createCustomer(1L, "Client"),
+				CustomersEntityTestFactory.createCustomer(2L, "Client2")
+		);
 
-		List<CustomersEntity> list = List.of(c1, c2);
+		Page<CustomersEntity> pages = new PageImpl<>(list);
+		
+		PageRequest pageRequest = PageRequest.of(0, 12, Direction.valueOf("ASC"), "name");
 
-		Mockito.when(service.findAll()).thenReturn(list);
+		when(service.findAllPaged(pageRequest)).thenReturn(pages);
 
-		mockMvc.perform(get("/v1/customers/list")
-				.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
+		ResultActions result = mockMvc.perform(get(URL_CUSTOMER)
+				.contentType(APPLICATION_JSON_UTF8));
+
+		result.andExpect(status().isOk());
+
 	}
 
 	@Test
 	public void deleteCustomer() throws Exception {
-		Long idCliente = 100L;
+		Long clientId = 100L;
 
-		Optional<CustomersEntity> cust = Optional.ofNullable(mockCustomersEntity());
+		Optional<CustomersEntity> cust = Optional.ofNullable(CustomersEntityTestFactory.createCustomer(1L, "Client"));
 
 		when(repository.findById(Mockito.anyLong())).thenReturn(cust);
-		doNothing().when(repository).deleteById(100L);
+		doNothing().when(repository).deleteById(clientId);
 
-		mockMvc.perform(delete("/v1/customers/{id}", idCliente))
-				.andExpect(status().isNoContent());
+		ResultActions result = mockMvc.perform(
+				delete(URL_CUSTOMER + "/{id}", clientId)
+				.header("Authorization", "Bearer " + token));
+
+		result.andExpect(status().isNoContent());
 	}
 
-	private CustomersEntity mockCustomersEntity() {
-		CustomersEntity cliente = new CustomersEntity();
-		cliente.setId(100L);
-		cliente.setName("Renan");
-		cliente.setBirthDate(LocalDateTime.of(1992, 07, 20, 23, 59));
-		return cliente;
+	public String obtainAccessToken(String username, String password) throws Exception {
+
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+		params.add("grant_type", "password");
+		params.add("client_id", clientId);
+		params.add("username", username);
+		params.add("password", password);
+
+
+		ResultActions result = mockMvc.perform(post("/oauth/token")
+						.params(params).with(httpBasic(clientId, clientSecret))
+						.accept(APPLICATION_JSON_UTF8))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(APPLICATION_JSON_UTF8));
+
+		String resultString = result.andReturn().getResponse().getContentAsString();
+
+		JacksonJsonParser jsonParser = new JacksonJsonParser();
+		return jsonParser.parseMap(resultString).get("access_token").toString();
 	}
+
 }
