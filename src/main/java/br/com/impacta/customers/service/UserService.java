@@ -2,14 +2,10 @@ package br.com.impacta.customers.service;
 
 import java.util.Optional;
 
-import javax.persistence.Entity;
-import javax.persistence.EntityNotFoundException;
-
+import br.com.impacta.customers.exceptions.ResourceExistsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,15 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import br.com.impacta.customers.dto.RoleDTO;
 import br.com.impacta.customers.dto.UserDTO;
-import br.com.impacta.customers.dto.UserInsertDTO;
-import br.com.impacta.customers.dto.UserUpdateDTO;
 import br.com.impacta.customers.entity.RoleEntity;
 import br.com.impacta.customers.entity.UserEntity;
-import br.com.impacta.customers.exceptions.DataBaseException;
 import br.com.impacta.customers.exceptions.ObjectNotFoundException;
 import br.com.impacta.customers.repository.RoleRepository;
 import br.com.impacta.customers.repository.UserRepository;
-import org.springframework.web.client.ResourceAccessException;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -59,6 +51,10 @@ public class UserService implements UserDetailsService {
 
 	@Transactional
 	public UserEntity insert(UserEntity userEntity) {
+		Optional<UserEntity> userEntityExist = Optional.ofNullable(repository.findByEmail(userEntity.getEmail()));
+		if(userEntityExist.isPresent()){
+			throw new ResourceExistsException("User is exists:" + userEntity.getEmail());
+		}
 		userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
 		return repository.save(userEntity);
 	}

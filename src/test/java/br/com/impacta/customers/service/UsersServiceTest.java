@@ -3,6 +3,7 @@ package br.com.impacta.customers.service;
 import br.com.impacta.customers.controller.factory.UserEntityTestFactory;
 import br.com.impacta.customers.entity.UserEntity;
 import br.com.impacta.customers.exceptions.ObjectNotFoundException;
+import br.com.impacta.customers.exceptions.ResourceExistsException;
 import br.com.impacta.customers.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -77,7 +78,7 @@ public class UsersServiceTest {
     }
 
     @Test
-    void save() {
+    void insertSuccess() {
         String password = "34rfyu";
         UserEntity userSave = UserEntityTestFactory.createUser(null,"Teste", "Teste", "teste@gmail.com", "teste");
         UserEntity userReturn = UserEntityTestFactory.createUser(1L,"Teste", "Teste", "teste@gmail.com", password);
@@ -90,6 +91,21 @@ public class UsersServiceTest {
 
         assertEquals(userEntity.getEmail(), userSave.getEmail());
         assertEquals(userEntity.getPassword(), password);
+    }
+
+    @Test
+    void insertUserExist() {
+        String emailExist = "teste@gmail.com";
+
+        UserEntity user = UserEntityTestFactory.createUser(1L,"Teste", "Teste", "teste@gmail.com");
+        UserEntity userExists = user;
+
+        assertThrows(ResourceExistsException.class, () -> {
+            when(repository.findByEmail(emailExist)).thenReturn(userExists);
+            when(service.insert(user)).thenReturn(userExists);
+        });
+        verify(repository, Mockito.times(1)).findByEmail(emailExist);
+
     }
 
     @Test
@@ -107,6 +123,8 @@ public class UsersServiceTest {
         assertEquals(userEntity.getEmail(), userReturn.getEmail());
         assertEquals(userEntity.getUsername(), userReturn.getUsername());
     }
+
+
 
     @Test
     void updateNotFound() {
