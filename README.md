@@ -41,7 +41,7 @@ http://localhost:8080/swagger-ui.html
 ### Importar as configurações do PostMan
 
 <a href=".github/archive/customers.environment.json">Variáveis de ambiente</a><br>
-<a href=".github/archive/customers.environment">Chamadas da api-rest</a><br>
+<a href=".github/archive/customers.collection.json">Chamadas da api-rest</a><br>
 
 
 ### Biblioteca usada no projeto
